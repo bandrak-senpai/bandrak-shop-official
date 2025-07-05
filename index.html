@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BANDRAK STORE Payment</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+        
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: #4cc9f0;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            transform: scale(0.95);
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards 0.5s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        @keyframes fadeIn {
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #4cc9f0, #4361ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .warning {
+            background: rgba(255, 59, 48, 0.2);
+            border-left: 4px solid #ff3b30;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
+        .warning p {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .payment-methods {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+        
+        .payment-method {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+            width: calc(50% - 8px);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .payment-method:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+        }
+        
+        .payment-method.active {
+            background: rgba(76, 201, 240, 0.2);
+            border: 1px solid #4cc9f0;
+        }
+        
+        .payment-method img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+        
+        .payment-method p {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .payment-details {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+            animation: fadeInUp 0.5s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .payment-details.active {
+            display: block;
+        }
+        
+        .payment-info {
+            margin-bottom: 15px;
+        }
+        
+        .payment-info h3 {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #4cc9f0;
+        }
+        
+        .payment-info p {
+            font-size: 14px;
+            opacity: 0.8;
+            word-break: break-all;
+        }
+        
+        .copy-btn {
+            background: rgba(76, 201, 240, 0.2);
+            color: #4cc9f0;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(76, 201, 240, 0.3);
+        }
+        
+        .qris-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .qris-img {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .qris-img:hover {
+            transform: scale(1.05);
+        }
+        
+        .qris-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        
+        .qris-modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .qris-modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 80%;
+            text-align: center;
+        }
+        
+        .qris-modal-content img {
+            max-width: 100%;
+            max-height: 80vh;
+        }
+        
+        .close-modal {
+            background: #ff3b30;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .contact {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .contact a {
+            color: #4cc9f0;
+            text-decoration: none;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                width: 95%;
+                padding: 20px;
+            }
+            
+            .payment-method {
+                width: 100%;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen">
+        <div class="loader"></div>
+        <p>Loading Payment Gateway...</p>
+    </div>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <div class="header">
+            <h1>BANDRAK STORE PAYMENT</h1>
+            <p>Please select your payment method</p>
+        </div>
+        
+        <div class="warning">
+            <p>⚠️ WELCOME TO PAYMENT! PLEASE DOUBLE CHECK BEFORE TRANSFERRING ⚠️</p>
+            <p style="margin-top: 5px;">JANGAN SALAH TRANSFER YA!</p>
+        </div>
+        
+        <div class="payment-methods">
+            <div class="payment-method" data-method="dana">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/7/72/Logo_DANA.svg" alt="DANA">
+                <p>DANA</p>
+            </div>
+            
+            <div class="payment-method" data-method="ovo">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/e/eb/Logo_ovo.svg" alt="OVO">
+                <p>OVO</p>
+            </div>
+            
+            <div class="payment-method" data-method="gopay">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/8/86/Gopay_logo.svg" alt="GOPAY">
+                <p>GOPAY</p>
+            </div>
+            
+            <div class="payment-method" data-method="qris">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/1200px-QR_code_for_mobile_English_Wikipedia.svg.png" alt="QRIS">
+                <p>QRIS</p>
+            </div>
+        </div>
+        
+        <!-- DANA Payment Details -->
+        <div class="payment-details" id="dana-details">
+            <div class="payment-info">
+                <h3>DANA Number</h3>
+                <p>085773652775</p>
+                <button class="copy-btn" data-text="085773652775">Copy Number</button>
+            </div>
+            <div class="payment-info">
+                <h3>Account Name</h3>
+                <p>indra Gunawan</p>
+                <button class="copy-btn" data-text="indra Gunawan">Copy Name</button>
+            </div>
+        </div>
+        
+        <!-- OVO Payment Details -->
+        <div class="payment-details" id="ovo-details">
+            <div class="payment-info">
+                <h3>OVO Number</h3>
+                <p>0895406196907</p>
+                <button class="copy-btn" data-text="0895406196907">Copy Number</button>
+            </div>
+            <div class="payment-info">
+                <h3>Account Name</h3>
+                <p>indra Gunawan</p>
+                <button class="copy-btn" data-text="indra Gunawan">Copy Name</button>
+            </div>
+        </div>
+        
+        <!-- GOPAY Payment Details -->
+        <div class="payment-details" id="gopay-details">
+            <div class="payment-info">
+                <h3>GOPAY Number</h3>
+                <p>085133499437</p>
+                <button class="copy-btn" data-text="085133499437">Copy Number</button>
+            </div>
+            <div class="payment-info">
+                <h3>Account Name</h3>
+                <p>indra Gunawan</p>
+                <button class="copy-btn" data-text="indra Gunawan">Copy Name</button>
+            </div>
+        </div>
+        
+        <!-- QRIS Payment Details -->
+        <div class="payment-details" id="qris-details">
+            <div class="payment-info">
+                <h3>QRIS</h3>
+                <p>Atas nama: bandrak store</p>
+            </div>
+            <div class="qris-container">
+                <img src="https://j.top4top.io/p_34713xwlx1.jpg" alt="QRIS" class="qris-img">
+                <p>Click QR to enlarge</p>
+            </div>
+        </div>
+        
+        <div class="contact">
+            Need help? <a href="https://wa.me/+62895406196907" target="_blank">Contact BANDRAK SHOP</a>
+        </div>
+    </div>
+    
+    <!-- QRIS Modal -->
+    <div class="qris-modal">
+        <div class="qris-modal-content">
+            <img src="https://j.top4top.io/p_34713xwlx1.jpg" alt="QRIS">
+            <button class="close-modal">Close</button>
+        </div>
+    </div>
+    
+    <script>
+        // Loading screen
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.querySelector('.loading-screen').classList.add('fade-out');
+            }, 1500);
+        });
+        
+        // Payment method selection
+        const paymentMethods = document.querySelectorAll('.payment-method');
+        const paymentDetails = document.querySelectorAll('.payment-details');
+        
+        paymentMethods.forEach(method => {
+            method.addEventListener('click', function() {
+                // Remove active class from all methods
+                paymentMethods.forEach(m => m.classList.remove('active'));
+                
+                // Add active class to clicked method
+                this.classList.add('active');
+                
+                // Hide all payment details
+                paymentDetails.forEach(detail => detail.classList.remove('active'));
+                
+                // Show selected payment details
+                const methodName = this.getAttribute('data-method');
+                document.getElementById(`${methodName}-details`).classList.add('active');
+            });
+        });
+        
+        // Copy button functionality
+        const copyButtons = document.querySelectorAll('.copy-btn');
+        copyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const textToCopy = this.getAttribute('data-text');
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                    }, 2000);
+                });
+            });
+        });
+        
+        // QRIS modal functionality
+        const qrisImg = document.querySelector('.qris-img');
+        const qrisModal = document.querySelector('.qris-modal');
+        const closeModal = document.querySelector('.close-modal');
+        
+        if (qrisImg) {
+            qrisImg.addEventListener('click', function() {
+                qrisModal.classList.add('active');
+            });
+        }
+        
+        closeModal.addEventListener('click', function() {
+            qrisModal.classList.remove('active');
+        });
+        
+        // Close modal when clicking outside
+        qrisModal.addEventListener('click', function(e) {
+            if (e.target === qrisModal) {
+                qrisModal.classList.remove('active');
+            }
+        });
+        
+        // Activate first payment method by default
+        if (paymentMethods.length > 0) {
+            paymentMethods[0].click();
+        }
+    </script>
+</body>
+</html>
